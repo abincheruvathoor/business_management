@@ -42,13 +42,19 @@ async function sendExcelEmail({
     const transportConfig = isGmail && !process.env.SMTP_HOST
       ? {
           service: "gmail",
-          auth: { user, pass }
+          auth: { user, pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000
         }
       : {
           host: host || "smtp.gmail.com",
           port,
           secure: port === 465,
-          auth: { user, pass }
+          auth: { user, pass },
+          connectionTimeout: 10000,
+          greetingTimeout: 10000,
+          socketTimeout: 15000
         };
 
     const transporter = nodemailer.createTransport(transportConfig);
