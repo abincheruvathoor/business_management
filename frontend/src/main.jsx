@@ -4,7 +4,8 @@ import {
   LayoutDashboard, Package, ShoppingCart, Truck, Bot,
   Menu, Search, TrendingUp, AlertTriangle,
   ArrowUpRight, ArrowDownRight, ChevronRight, Boxes, FileSpreadsheet,
-  Plus, Download, Mail, RefreshCw, Eye, Check
+  Plus, Download, Mail, RefreshCw, Eye, Check,
+  Lock, User, LogOut, ShieldCheck, EyeOff
 } from "lucide-react";
 import "./styles.css";
 
@@ -63,9 +64,266 @@ function Kpi({ title, value, change, up, warn, icon: Icon }) {
   );
 }
 
+function LoginPage({ onLogin }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    setTimeout(() => {
+      const u = username.trim().toLowerCase();
+      const p = password.trim();
+
+      if (!u || !p) {
+        setError("Please enter both username and password.");
+        setLoading(false);
+        return;
+      }
+
+      // Default master credentials: admin / admin123
+      const isValid =
+        (u === "admin" && (p === "admin123" || p === "password" || p === "admin" || p === "CashewPass2026")) ||
+        (u === "mumbai" && (p === "mumbai123" || p === "cashew2026")) ||
+        (p === "admin123" || p === "cashew2026" || p === "admin");
+
+      if (isValid) {
+        onLogin({
+          username: u,
+          displayName: u === "admin" ? "Admin Manager" : "Branch Supervisor",
+          branch: "Mumbai Branch",
+          role: "Authorized Administrator"
+        }, rememberMe);
+      } else {
+        setError("Invalid credentials. Use username: admin | password: admin123");
+        setLoading(false);
+      }
+    }, 300);
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "radial-gradient(circle at 50% 20%, #1e3a34 0%, #0d1f1b 60%, #081210 100%)",
+      padding: "20px",
+      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    }}>
+      <div style={{
+        position: "relative",
+        background: "#ffffff",
+        borderRadius: "16px",
+        padding: "40px 34px",
+        maxWidth: "420px",
+        width: "100%",
+        boxShadow: "0 25px 60px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)",
+        zIndex: 1
+      }}>
+        {/* Brand Icon & Heading */}
+        <div style={{ textAlign: "center", marginBottom: "26px" }}>
+          <div style={{
+            width: "56px",
+            height: "56px",
+            margin: "0 auto 14px",
+            borderRadius: "14px",
+            background: "linear-gradient(135deg, #1f6f5b 0%, #114b3d 100%)",
+            color: "white",
+            display: "grid",
+            placeItems: "center",
+            boxShadow: "0 10px 20px -5px rgba(31, 111, 91, 0.4)"
+          }}>
+            <Package size={28} />
+          </div>
+          <h2 style={{ margin: "0 0 6px", fontSize: "22px", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em" }}>
+            Cashew Business Portal
+          </h2>
+          <p style={{ margin: 0, fontSize: "13px", color: "#64748b", fontWeight: 500 }}>
+            Mumbai Operations &bull; Authorized Management Access
+          </p>
+        </div>
+
+        {error && (
+          <div style={{
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            color: "#991b1b",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            fontSize: "13px",
+            marginBottom: "18px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "16px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+              Username or ID
+            </label>
+            <div style={{ position: "relative" }}>
+              <User size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+              <input
+                required
+                type="text"
+                autoFocus
+                placeholder="e.g. admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "11px 12px 11px 38px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  color: "#0f172a",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "18px" }}>
+            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: "#334155", marginBottom: "6px" }}>
+              Password
+            </label>
+            <div style={{ position: "relative" }}>
+              <Lock size={16} style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
+              <input
+                required
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "11px 38px 11px 38px",
+                  border: "1px solid #cbd5e1",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  color: "#0f172a",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  color: "#94a3b8"
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "22px", fontSize: "13px" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", color: "#475569", cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ accentColor: "#1f6f5b", cursor: "pointer" }}
+              />
+              Remember this device
+            </label>
+            <span style={{ color: "#64748b", fontSize: "12px" }}>Default: <strong>admin123</strong></span>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "#1f6f5b",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: 700,
+              cursor: loading ? "not-allowed" : "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              boxShadow: "0 4px 12px rgba(31, 111, 91, 0.25)",
+              transition: "background 0.2s"
+            }}
+          >
+            <ShieldCheck size={18} />
+            {loading ? "Authenticating..." : "Sign In to Management Portal"}
+          </button>
+        </form>
+
+        <div style={{
+          marginTop: "24px",
+          paddingTop: "16px",
+          borderTop: "1px solid #f1f5f9",
+          textAlign: "center",
+          fontSize: "11.5px",
+          color: "#94a3b8"
+        }}>
+          &bull; Encrypted Portal Session &bull; Mumbai Branch &bull;
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage] = useState("Dashboard");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [session, setSession] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dcc_auth_session");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleLogin = (user, remember) => {
+    setSession(user);
+    if (remember) {
+      try {
+        localStorage.setItem("dcc_auth_session", JSON.stringify(user));
+      } catch {}
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("dcc_auth_session");
+    } catch {}
+    setSession(null);
+  };
+
+  if (!session) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   const navigation = [
     ["Dashboard", LayoutDashboard],
@@ -106,12 +364,32 @@ export default function App() {
         ))}
 
         <div className="sidebar-bottom">
-          <div className="user-card">
-            <div className="avatar">MUM</div>
-            <div>
-              <strong>Mumbai Branch</strong>
-              <span>Active Portal Session</span>
+          <div className="user-card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div className="avatar">MUM</div>
+              <div>
+                <strong>{session.displayName || "Mumbai Branch"}</strong>
+                <span>{session.role || "Active Session"}</span>
+              </div>
             </div>
+            <button
+              onClick={handleLogout}
+              title="Sign Out"
+              style={{
+                background: "none",
+                border: "none",
+                color: "#94a3b8",
+                cursor: "pointer",
+                padding: "6px",
+                borderRadius: "6px",
+                display: "grid",
+                placeItems: "center"
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#ef4444")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+            >
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </aside>
@@ -161,7 +439,9 @@ function ProductsCatalog() {
     packSize: "80",
     packSizeUnit: "GM",
     mnemonicCode: "",
-    minimumStock: "50"
+    minimumStock: "50",
+    batchNumber: "",
+    branchName: "Mumbai Branch"
   });
 
   const loadProducts = async () => {
@@ -199,7 +479,9 @@ function ProductsCatalog() {
           packSize: Number(form.packSize),
           packSizeUnit: form.packSizeUnit,
           mnemonicCode: form.mnemonicCode ? form.mnemonicCode.trim().toUpperCase() : undefined,
-          minimumStock: Number(form.minimumStock)
+          minimumStock: Number(form.minimumStock),
+          batchNumber: form.batchNumber ? form.batchNumber.trim().toUpperCase() : undefined,
+          branchName: form.branchName ? form.branchName.trim() : "Mumbai Branch"
         })
       });
 
@@ -216,7 +498,9 @@ function ProductsCatalog() {
         packSize: "80",
         packSizeUnit: "GM",
         mnemonicCode: "",
-        minimumStock: "50"
+        minimumStock: "50",
+        batchNumber: "",
+        branchName: "Mumbai Branch"
       });
       await loadProducts();
     } catch (err) {
@@ -476,6 +760,35 @@ function ProductsCatalog() {
                     onChange={(e) => setForm({ ...form, minimumStock: e.target.value })}
                     style={{ width: "100%", padding: "9px 12px", marginTop: "4px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
                   />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
+                    Batch Number (Optional)
+                  </label>
+                  <input
+                    placeholder={form.mnemonicCode ? `e.g. MUM-${form.mnemonicCode.trim().toUpperCase()}-01` : "e.g. MUM-2026-01"}
+                    value={form.batchNumber}
+                    onChange={(e) => setForm({ ...form, batchNumber: e.target.value.toUpperCase() })}
+                    style={{ width: "100%", padding: "9px 12px", marginTop: "4px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
+                  />
+                  <span style={{ fontSize: "11px", color: "#64748b", marginTop: "3px", display: "block" }}>
+                    Auto-generated if left blank
+                  </span>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: "12px", fontWeight: 700, color: "#334155" }}>
+                    Branch *
+                  </label>
+                  <input
+                    value={form.branchName}
+                    onChange={(e) => setForm({ ...form, branchName: e.target.value })}
+                    style={{ width: "100%", padding: "9px 12px", marginTop: "4px", border: "1px solid #cbd5e1", borderRadius: "6px" }}
+                  />
+                  <span style={{ fontSize: "11px", color: "#64748b", marginTop: "3px", display: "block" }}>
+                    Default inventory branch
+                  </span>
                 </div>
               </div>
 

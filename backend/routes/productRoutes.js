@@ -78,10 +78,13 @@ router.post("/", async (req, res) => {
 
     // Create initial inventory batch if initial stock > 0
     if (initialStock > 0) {
-      const batchNumber = `MUM-${mnemonicCode || "B1"}-01`;
+      const customBatch = String(req.body.batchNumber || "").trim().toUpperCase();
+      const batchNumber = customBatch || `MUM-${mnemonicCode || "B1"}-01`;
+      const branchName = String(req.body.branchName || "Mumbai Branch").trim();
+
       await InventoryBatch.create({
         product: product._id,
-        branchName: "Mumbai Branch",
+        branchName,
         batchNumber,
         physicalQty: initialStock,
         packSize: `${packSize}GM`
