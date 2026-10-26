@@ -2,8 +2,8 @@ require("dotenv").config();
 
 const { Telegraf, Markup, session } = require("telegraf");
 
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const apiBase = process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`;
+const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+const apiBase = (process.env.API_BASE_URL || `http://localhost:${process.env.PORT || 5000}`).trim();
 const branchName = process.env.DEFAULT_BRANCH_NAME || "Mumbai Branch";
 
 if (!token) {
@@ -689,11 +689,23 @@ bot.catch((error) => {
   console.error("Telegram bot error:", error);
 });
 
-bot.launch()
-  .then(() => console.log("Telegram bot is running"))
-  .catch((error) => {
-    console.error("Failed to start Telegram bot:", error.message);
-  });
+async function startBotWithRetry(maxRetries = 6, delayMs = 5000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await bot.launch({ dropPendingUpdates: true });
+      console.log("Telegram bot is running");
+      return;
+    } catch (error) {
+      console.error(`Attempt ${attempt}/${maxRetries} to start Telegram bot failed: ${error.message}`);
+      if (attempt < maxRetries) {
+        console.log(`Retrying Telegram bot connection in ${delayMs / 1000}s...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+}
+
+startBotWithRetry();
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
