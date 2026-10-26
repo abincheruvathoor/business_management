@@ -12,12 +12,14 @@ const purchaseRoutes = require("./routes/purchaseRoutes");
 const inventoryBatchRoutes = require("./routes/inventoryBatchRoutes");
 const stockStatementRoutes = require("./routes/stockStatementRoutes");
 const branchRoutes = require("./routes/branchRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/sales", saleRoutes);
 app.use("/api/dashboard", dashboardRoutes);

@@ -72,39 +72,37 @@ function LoginPage({ onLogin }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
+    try {
       const u = username.trim().toLowerCase();
       const p = password.trim();
 
       if (!u || !p) {
-        setError("Please enter both username and password.");
-        setLoading(false);
-        return;
+        throw new Error("Please enter both username and password.");
       }
 
-      // Default master credentials: admin / admin123
-      const isValid =
-        (u === "admin" && (p === "admin123" || p === "password" || p === "admin" || p === "CashewPass2026")) ||
-        (u === "mumbai" && (p === "mumbai123" || p === "cashew2026")) ||
-        (p === "admin123" || p === "cashew2026" || p === "admin");
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: p })
+      });
 
-      if (isValid) {
-        onLogin({
-          username: u,
-          displayName: u === "admin" ? "Admin Manager" : "Branch Supervisor",
-          branch: "Mumbai Branch",
-          role: "Authorized Administrator"
-        }, rememberMe);
-      } else {
-        setError("Invalid username or password. Please try again.");
-        setLoading(false);
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.message || "Invalid username or password.");
       }
-    }, 300);
+
+      onLogin(data.user, rememberMe);
+    } catch (err) {
+      setError(err.message || "Authentication failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
