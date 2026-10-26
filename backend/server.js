@@ -71,6 +71,42 @@ app.get("/api/bot-debug", async (req, res) => {
   }
 });
 
+// Diagnostic route to check Render outbound SMTP port firewall status
+app.get("/api/smtp-debug", async (req, res) => {
+  const net = require("net");
+  function testPort(host, port) {
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
+      socket.setTimeout(4000);
+      socket.on("connect", () => {
+        socket.destroy();
+        resolve({ port, status: "OPEN" });
+      });
+      socket.on("timeout", () => {
+        socket.destroy();
+        resolve({ port, status: "TIMEOUT_BLOCKED" });
+      });
+      socket.on("error", (err) => {
+        socket.destroy();
+        resolve({ port, status: "ERROR", error: err.message });
+      });
+      socket.connect(port, host);
+    });
+  }
+
+  const [p465, p587] = await Promise.all([
+    testPort("smtp.gmail.com", 465),
+    testPort("smtp.gmail.com", 587)
+  ]);
+
+  res.json({
+    emailUser: process.env.EMAIL_USER ? process.env.EMAIL_USER.replace(/(.{3})(.*)(@.*)/, "$1***$3") : "NOT_SET",
+    hasEmailPass: Boolean(process.env.EMAIL_PASS),
+    p465,
+    p587
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
