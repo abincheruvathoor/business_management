@@ -44,6 +44,31 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// Diagnostic route to inspect Telegram API connectivity directly from Render container
+app.get("/api/bot-debug", async (req, res) => {
+  const token = (process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  try {
+    const rawRes = await fetch(`https://api.telegram.org/bot${token}/getMe`);
+    const data = await rawRes.json().catch((e) => ({ jsonError: e.message }));
+    res.json({
+      success: true,
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 10),
+      httpStatus: rawRes.status,
+      telegramResponse: data
+    });
+  } catch (err) {
+    res.json({
+      success: false,
+      tokenLength: token.length,
+      tokenPrefix: token.substring(0, 10),
+      errorMessage: err.message,
+      errorCode: err.code || null,
+      errorCause: err.cause ? String(err.cause) : null
+    });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 async function startServer() {
