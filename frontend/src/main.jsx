@@ -101,7 +101,7 @@ function LoginPage({ onLogin }) {
           role: "Authorized Administrator"
         }, rememberMe);
       } else {
-        setError("Invalid credentials. Use username: admin | password: admin123");
+        setError("Invalid username or password. Please try again.");
         setLoading(false);
       }
     }, 300);
@@ -249,7 +249,6 @@ function LoginPage({ onLogin }) {
               />
               Remember this device
             </label>
-            <span style={{ color: "#64748b", fontSize: "12px" }}>Default: <strong>admin123</strong></span>
           </div>
 
           <button
