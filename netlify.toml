@@ -6,6 +6,7 @@
 [build.environment]
   NODE_VERSION = "22"
   NPM_FLAGS = "--legacy-peer-deps"
+  VITE_API_BASE = "https://business-management-api-toez.onrender.com/api"
 
 [[redirects]]
   from = "/*"
