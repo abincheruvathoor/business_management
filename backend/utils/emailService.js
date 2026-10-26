@@ -28,16 +28,53 @@ async function sendExcelEmail({
     throw new Error("A request to send this document to this recipient was already processed recently. Please wait a few seconds.");
   }
 
-  const user = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
-  const rawPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || "").trim();
-  const pass = rawPass.replace(/\s+/g, ""); // Clean any spaces in Google 16-character App Password
-  const host = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-  const port = Number(process.env.SMTP_PORT || process.env.EMAIL_PORT || 465);
-  const isGmail = !host || host.includes("gmail") || user.toLowerCase().endsWith("@gmail.com");
+  const resendKey = (process.env.RESEND_API_KEY || "").trim();
 
-  const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || (user ? `"Cashew Business Management" <${user}>` : '"Cashew Business Management" <orders@deliciouscashew.com>');
+  // 1. If Resend API Key is available, send via HTTPS Port 443 (100% immune to cloud SMTP blocks)
+  if (resendKey) {
+    const fromAddress = process.env.RESEND_FROM || "Cashew Business Management <onboarding@resend.dev>";
+    const base64Content = buffer ? Buffer.from(buffer).toString("base64") : "";
 
-  // If credentials are configured, send via nodemailer
+    const payload = {
+      from: fromAddress,
+      to: [recipient],
+      subject,
+      html: html || `<p>Please find the attached workbook: <strong>${filename}</strong></p><p>Regards,<br>Cashew Business Management</p>`,
+      text: text || "Please find the attached company workbook.",
+      attachments: filename && base64Content ? [
+        {
+          filename,
+          content: base64Content
+        }
+      ] : []
+    };
+
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      console.error("Resend API delivery error:", data);
+      throw new Error(data.message || `Resend delivery failed (${res.status})`);
+    }
+
+    return {
+      success: true,
+      provider: "resend",
+      recipient,
+      messageId: data.id,
+      message: `Email sent successfully to ${recipient} via Resend!`
+    };
+  }
+
+  // 2. If credentials are configured, send via nodemailer
   if (user && pass) {
     const transportConfig = isGmail && !process.env.SMTP_HOST
       ? {
